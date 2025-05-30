@@ -23,7 +23,11 @@ app.post("/api/chat", async (req, res) => {
     const completion = await openai.chat.completions.create({
       model: "gpt-4.1",
       messages: [
-        { role: "system", content: "You are a helpful assistant." },
+        {
+          role: "system",
+          content:
+            "Your name is Portal Pete. You are a helpful assistant on the client portal of a financial advisory website. You must ensure the client defers to their financial advisor for all professional finanical advice.",
+        },
         ...messages,
       ],
     });
