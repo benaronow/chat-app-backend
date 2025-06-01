@@ -33,11 +33,9 @@ const MODEL_IDENTITY_MESSAGE =
 
 app.post("/api/chat", async (req, res) => {
   const { model, messages } = req.body;
-  console.log(messages);
 
   if (model === "gpt") {
     try {
-      console.log("hello");
       const completion = await openai.chat.completions.create({
         model: "gpt-4.1",
         messages: [
@@ -86,6 +84,38 @@ app.post("/api/chat", async (req, res) => {
       )) as string;
       const json = JSON.parse(responseBody);
       res.json({ reply: json.content[0].text });
+    } catch (error) {
+      console.error("Bedrock API error:", error);
+      res.status(500).json({ reply: "Sorry, something went wrong." });
+    }
+  }
+
+  if (model === "deepseek") {
+    const command = new InvokeModelCommand({
+      modelId: "us.deepseek.r1-v1:0",
+      contentType: "application/json",
+      accept: "application/json",
+      body: JSON.stringify({
+        temperature: 1,
+        top_p: 0.999,
+        max_tokens: 200,
+        messages: [
+          {
+            role: "user",
+            content: MODEL_IDENTITY_MESSAGE,
+          },
+          ...messages,
+        ],
+      }),
+    });
+
+    try {
+      const response = await bedrock.send(command);
+      const responseBody: string = (await streamToString(
+        response.body
+      )) as string;
+      const json = JSON.parse(responseBody);
+      res.json({ reply: json.choices[0].message.content });
     } catch (error) {
       console.error("Bedrock API error:", error);
       res.status(500).json({ reply: "Sorry, something went wrong." });
