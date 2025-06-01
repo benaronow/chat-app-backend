@@ -66,7 +66,7 @@ app.post("/api/chat", async (req, res) => {
       accept: "application/json",
       body: JSON.stringify({
         anthropic_version: "bedrock-2023-05-31",
-        max_tokens: 200,
+        max_tokens: 512,
         top_k: 250,
         stop_sequences: [],
         temperature: 1,
@@ -104,7 +104,7 @@ app.post("/api/chat", async (req, res) => {
       body: JSON.stringify({
         temperature: 0.7,
         top_p: 0.9,
-        max_tokens: 200,
+        max_tokens: 512,
         messages: [
           {
             role: "user",
