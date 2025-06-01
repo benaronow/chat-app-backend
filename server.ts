@@ -47,7 +47,11 @@ app.post("/api/chat", async (req, res) => {
         ],
       });
 
-      res.json({ reply: completion.choices[0].message?.content });
+      res.json({
+        reply:
+          completion.choices[0]?.message?.content ??
+          "Sorry, something went wrong.",
+      });
     } catch (error) {
       console.error("OpenAI API error:", error);
       res.status(500).json({ reply: "Sorry, something went wrong." });
@@ -83,7 +87,9 @@ app.post("/api/chat", async (req, res) => {
         response.body
       )) as string;
       const json = JSON.parse(responseBody);
-      res.json({ reply: json.content[0].text });
+      res.json({
+        reply: json.content[0]?.text ?? "Sorry, something went wrong.",
+      });
     } catch (error) {
       console.error("Bedrock API error:", error);
       res.status(500).json({ reply: "Sorry, something went wrong." });
@@ -115,7 +121,10 @@ app.post("/api/chat", async (req, res) => {
         response.body
       )) as string;
       const json = JSON.parse(responseBody);
-      res.json({ reply: json.choices[0].message.content });
+      res.json({
+        reply:
+          json.choices[0]?.message?.content ?? "Sorry, something went wrong.",
+      });
     } catch (error) {
       console.error("Bedrock API error:", error);
       res.status(500).json({ reply: "Sorry, something went wrong." });
