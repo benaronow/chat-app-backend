@@ -96,8 +96,8 @@ app.post("/api/chat", async (req, res) => {
       contentType: "application/json",
       accept: "application/json",
       body: JSON.stringify({
-        temperature: 1,
-        top_p: 0.999,
+        temperature: 0.7,
+        top_p: 0.9,
         max_tokens: 200,
         messages: [
           {
