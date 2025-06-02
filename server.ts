@@ -7,7 +7,7 @@ import {
   InvokeModelCommand,
 } from "@aws-sdk/client-bedrock-runtime";
 import { streamToString } from "./utils";
-import { ChatSyncCommand, QBusinessClient } from "@aws-sdk/client-qbusiness";
+import { QBusinessClient } from "@aws-sdk/client-qbusiness";
 
 dotenv.config();
 const app = express();
@@ -23,8 +23,6 @@ const openai = new OpenAI({
 });
 
 const bedrock = new BedrockRuntimeClient({ region: "us-east-1" });
-
-const amazonQ = new QBusinessClient({ region: "us-east-1" });
 
 const MODEL_IDENTITY_MESSAGE =
   "Your name is Portal Pete. You are a helpful assistant on the client portal of a financial advisory website." +
@@ -133,47 +131,6 @@ app.post("/api/chat", async (req, res) => {
     } catch (error) {
       console.error("Bedrock API error:", error);
       res.json({ reply: "Sorry, something went wrong." });
-      res.status(500).json({ reply: "Sorry, something went wrong." });
-    }
-  }
-
-  if (model === "q") {
-    const command = new ChatSyncCommand(
-      qInfo.conversationId && qInfo.parentMessageId
-        ? {
-            conversationId: qInfo.conversationId,
-            parentMessageId: qInfo.parentMessageId,
-            applicationId: process.env.Q_APP_ID,
-            userMessage: messages[messages.length - 1].content,
-          }
-        : {
-            applicationId: process.env.Q_APP_ID,
-            userMessage:
-              "This message contains your instructions: " +
-              MODEL_IDENTITY_MESSAGE,
-          }
-    );
-
-    try {
-      const response = await amazonQ.send(command);
-      const responseInfo = {
-        conversationId: response.conversationId,
-        parentMessageId: response.systemMessageId,
-      };
-      console.log(responseInfo);
-      res.json({
-        reply: response.systemMessage ?? "Sorry, something went wrong.",
-        qInfo: responseInfo,
-      });
-    } catch (error) {
-      console.error("Amazon Q Business API error:", error);
-      res.json({
-        reply: "Sorry, something went wrong.",
-        qInfo: {
-          conversationId: qInfo.conversationId,
-          parentMessageId: qInfo.parentMessageId,
-        },
-      });
       res.status(500).json({ reply: "Sorry, something went wrong." });
     }
   }
