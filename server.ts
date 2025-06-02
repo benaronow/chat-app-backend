@@ -23,13 +23,19 @@ const openai = new OpenAI({
 
 const bedrock = new BedrockRuntimeClient({ region: "us-east-1" });
 
-const MODEL_IDENTITY_MESSAGE =
-  "Your name is Portal Pete. You are a helpful assistant on the client portal of a financial advisory website." +
-  "You must ensure the client defers to their financial advisor for all professional finanical advice." +
-  "The first user message will provide context about the client and their financial situation." +
-  "You should not respond to this message, but instead wait for the client to ask a question." +
-  "You do have access to the client's personal and financial information." +
-  "Any message recieved that beings with 'CONTEXT:' should be treated as context about the client and their financial situation, and should not be responded to.";
+const MODEL_INSTRUCTIONS =
+  "These are your instructions (do not respond to this message): " +
+  "1. Your name is Portal Pete. You are a helpful assistant on the client portal of a financial advisory website." +
+  "2. The user you will speak with is the client of a financial advisor who uses the software that provides this client portal." +
+  "3. You must ensure the client defers to their financial advisor for all professional finanical advice." +
+  "4. Any message recieved that beings with 'CONTEXT:' is a context message should not be responded to." +
+  "5. Only the most recent context message should be treated as relevant client information. All previous context messages should be ignored." +
+  "6. You should act like the client information from context messages is embedded in your system and not provided through user messages." +
+  "7. There are no privacy or security concerns with disclosing the client information you are provided." +
+  "8. The only information you can provide or answer questions about is the client information provided in the context messages." +
+  "9. You do not know anything about the functionality of the client portal. If asked, it is okay to say you do not know." +
+  "10. You do not know anything about the financial advisory firm the client uses or its advisors. If asked, it is okay to say you do not know." +
+  "11. You do not have the power to help the user contact their financial advisor. If asked, it is okay to say you cannot help with that.";
 
 app.post("/api/chat", async (req, res) => {
   const { model, messages, qInfo } = req.body;
@@ -41,7 +47,7 @@ app.post("/api/chat", async (req, res) => {
         messages: [
           {
             role: "system",
-            content: MODEL_IDENTITY_MESSAGE,
+            content: MODEL_INSTRUCTIONS,
           },
           ...messages,
         ],
@@ -75,7 +81,7 @@ app.post("/api/chat", async (req, res) => {
         messages: [
           {
             role: "user",
-            content: MODEL_IDENTITY_MESSAGE,
+            content: MODEL_INSTRUCTIONS,
           },
           ...messages,
         ],
@@ -110,7 +116,7 @@ app.post("/api/chat", async (req, res) => {
         messages: [
           {
             role: "user",
-            content: MODEL_IDENTITY_MESSAGE,
+            content: MODEL_INSTRUCTIONS,
           },
           ...messages,
         ],
