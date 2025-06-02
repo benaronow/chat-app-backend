@@ -7,7 +7,6 @@ import {
   InvokeModelCommand,
 } from "@aws-sdk/client-bedrock-runtime";
 import { streamToString } from "./utils";
-import { QBusinessClient } from "@aws-sdk/client-qbusiness";
 
 dotenv.config();
 const app = express();
