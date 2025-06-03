@@ -1,8 +1,8 @@
-const axios = require("axios");
-const fs = require("fs");
-const NodeFormData = require("form-data");
-const fg = require("fast-glob");
-const fsExtra = require("fs-extra");
+import axios from "axios";
+import fs from "fs";
+import NodeFormData from "form-data";
+import fg from "fast-glob";
+import fsExtra from "fs-extra";
 
 const BACKEND_URL = "http://localhost:3001/upload";
 const GLOB_PATTERN = "../chat-app-frontend/src/components/**/*.{tsx,jsx}";
