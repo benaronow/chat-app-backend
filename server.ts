@@ -39,10 +39,8 @@ const MODEL_INSTRUCTIONS =
 app.post("/api/chat", async (req, res) => {
   const { model, messages, file } = req.body;
 
-  const fileContents = await readFileContent(
-    file === "accounts"
-      ? "../chat-app-frontend/src/components/Accounts.tsx"
-      : "../chat-app-frontend/src/components/Spending.tsx"
+  const fileContent = await readFileContent(
+    file === "accounts" ? "./files/Accounts.txt" : "./files/Spending.txt"
   );
 
   const fileSpecificInstructions =
@@ -54,15 +52,10 @@ app.post("/api/chat", async (req, res) => {
     "Do not use language that suggests you are talking about a 'component' or 'code'. The component is the entire scope of your knowledge. " +
     "If you answer the user's question about the component, you cannot suggest they contact their financial advisor. " +
     "Do not give general answers using language such as 'such as' or 'for example'. Answer the user's question directly based on the component. " +
-    `Here are is the component: ${fileContents}`;
+    `Here are is the component: ${fileContent}`;
 
   if (model === "gpt") {
     try {
-      const fileContents = await readFileContent(
-        "../chat-app-frontend/src/components/Accounts.tsx"
-      );
-      console.log("File contents:", fileContents);
-
       const completion = await openai.chat.completions.create({
         model: "gpt-4.1",
         messages: [
