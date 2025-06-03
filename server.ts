@@ -6,7 +6,7 @@ import {
   BedrockRuntimeClient,
   InvokeModelCommand,
 } from "@aws-sdk/client-bedrock-runtime";
-import { streamToString } from "./utils";
+import { readFileContent, streamToString } from "./utils";
 
 dotenv.config();
 const app = express();
@@ -33,21 +33,42 @@ const MODEL_INSTRUCTIONS =
   "6. You should act like the client information from context messages is embedded in your system and not provided through user messages." +
   "7. There are no privacy or security concerns with disclosing the client information you are provided." +
   "8. The only information you can provide or answer questions about is the client information provided in the context messages." +
-  "9. You do not know anything about the functionality of the client portal. If asked, it is okay to say you do not know." +
-  "10. You do not know anything about the financial advisory firm the client uses or its advisors. If asked, it is okay to say you do not know." +
-  "11. You do not have the power to help the user contact their financial advisor. If asked, it is okay to say you cannot help with that.";
+  "9. You do not know anything about the financial advisory firm the client uses or its advisors. If asked, it is okay to say you do not know." +
+  "10. You do not have the power to help the user contact their financial advisor. If asked, it is okay to say you cannot help with that.";
 
 app.post("/api/chat", async (req, res) => {
-  const { model, messages, qInfo } = req.body;
+  const { model, messages, file } = req.body;
+
+  const fileContents = await readFileContent(
+    file === "accounts"
+      ? "../chat-app-frontend/src/components/Accounts.tsx"
+      : "../chat-app-frontend/src/components/Spending.tsx"
+  );
+
+  const fileSpecificInstructions =
+    MODEL_INSTRUCTIONS +
+    "11. This is a component in the client portal that the user needs help understanding. " +
+    "You understand the the functionality of this component, but nothing else in the client portal. " +
+    "If the user asks how something works in the client portal, you can only answer based off of this component. " +
+    "You do not need to tell the client to look for the component. They are already looking at it. " +
+    "Do not use language that suggests you are talking about a 'component' or 'code'. The component is the entire scope of your knowledge. " +
+    "If you answer the user's question about the component, you cannot suggest they contact their financial advisor. " +
+    "Do not give general answers using language such as 'such as' or 'for example'. Answer the user's question directly based on the component. " +
+    `Here are is the component: ${fileContents}`;
 
   if (model === "gpt") {
     try {
+      const fileContents = await readFileContent(
+        "../chat-app-frontend/src/components/Accounts.tsx"
+      );
+      console.log("File contents:", fileContents);
+
       const completion = await openai.chat.completions.create({
         model: "gpt-4.1",
         messages: [
           {
             role: "system",
-            content: MODEL_INSTRUCTIONS,
+            content: fileSpecificInstructions,
           },
           ...messages,
         ],
@@ -81,7 +102,7 @@ app.post("/api/chat", async (req, res) => {
         messages: [
           {
             role: "user",
-            content: MODEL_INSTRUCTIONS,
+            content: fileSpecificInstructions,
           },
           ...messages,
         ],
@@ -116,7 +137,7 @@ app.post("/api/chat", async (req, res) => {
         messages: [
           {
             role: "user",
-            content: MODEL_INSTRUCTIONS,
+            content: fileSpecificInstructions,
           },
           ...messages,
         ],
