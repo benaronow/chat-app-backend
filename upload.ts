@@ -8,7 +8,7 @@ const BACKEND_URL = "http://localhost:3001/upload";
 const GLOB_PATTERN = "../chat-app-frontend/src/components/**/*.{tsx,jsx}";
 
 async function uploadFiles() {
-  await fsExtra.emptyDir("uploads");
+  await fsExtra.emptyDir("files");
 
   const files = await fg(GLOB_PATTERN);
 

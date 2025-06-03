@@ -6,22 +6,27 @@ import {
   type KeyboardEvent,
 } from "react";
 import { useBreakpoint } from "../useBreakpoint";
-import { useAppContext, type Model } from "../providers/AppProvider";
+import { useAppContext } from "../providers/AppProvider";
 import axios from "axios";
-import { IoSend } from "react-icons/io5";
+import { IoClose, IoSend, IoSettingsSharp } from "react-icons/io5";
 import { GrPowerReset } from "react-icons/gr";
 
-export const Chat = () => {
+interface Props {
+  ref?: React.Ref<HTMLDivElement>;
+}
+
+export const Chat = ({ ref }: Props) => {
   const { baseCompHeight } = useBreakpoint();
   const {
     model,
-    changeModel,
     input,
     changeInput,
     messageLog,
     changeMessageLog,
     initialLoaded,
     visibleComp,
+    changeChatOpen,
+    instructions,
   } = useAppContext();
 
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -61,7 +66,9 @@ export const Chat = () => {
         {
           model,
           messages: [...messageLog, { role: "user", content: input }],
-          file: visibleComp,
+          instructions,
+          filename:
+            visibleComp === "accounts" ? "Accounts.tsx" : "Spending.tsx",
         }
       );
       changeMessageLog("setLast", {
@@ -73,42 +80,30 @@ export const Chat = () => {
     }
   };
 
-  const handleModelChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    changeModel(e.target.value as Model);
-  };
-
-  const handleClearMessages = () => {
-    const contextMessages = messageLog.filter((m) =>
-      m.content.startsWith("CONTEXT:")
-    );
-    changeMessageLog("reset", contextMessages[contextMessages.length - 1]);
-  };
-
   return (
-    <div className="rounded w-100 shadow" style={{ height: baseCompHeight }}>
+    <div
+      className="rounded w-100 shadow"
+      style={{ height: baseCompHeight }}
+      ref={ref}
+    >
       <div
-        className="d-flex justify-content-center align-items-center bg-primary-subtle rounded-top p-2"
+        className="d-flex gap-2 align-items-center bg-primary-subtle rounded-top p-2"
         style={{ height: "50px" }}
       >
         <span className="fs-4 fw-bold w-100 ms-1 text-nowrap">Chat</span>
-        <select
-          className="w-100 form-select"
-          onChange={handleModelChange}
-          defaultValue={model}
+        <button
+          className="btn btn-secondary d-flex align-items-center fs-4"
+          data-bs-toggle="modal"
+          data-bs-target="#settings-dialog"
         >
-          <option value="gpt" label="GPT 4.1 via OpenAI">
-            GPT 4.1 via OpenAI
-          </option>
-          <option
-            value="claude"
-            label="Claude Sonnet 3.5 + Haiku 3.5 via Bedrock"
-          >
-            Claude Sonnet 3.5 + Haiku 3.5 via Bedrock
-          </option>
-          <option value="deepseek" label="Deepseek R1 via Bedrock">
-            Deepseek R1 via Bedrock
-          </option>
-        </select>
+          <IoSettingsSharp />
+        </button>
+        <button
+          className="btn btn-danger d-flex align-items-center fs-4"
+          onClick={() => changeChatOpen(false)}
+        >
+          <IoClose />
+        </button>
       </div>
       <div
         className="d-flex justify-content-center align-items-center w-100"
@@ -123,7 +118,7 @@ export const Chat = () => {
               <img src="/portal-pete.png" height={50} width={50} />
             </div>
             <div
-              className="d-flex flex-column gap-3 rounded-top overflow-scroll py-3 pe-3 w-100"
+              className="d-flex flex-column gap-3 rounded-top overflow-y-scroll py-3 pe-3 w-100"
               style={{ height: `calc(${baseCompHeight} - 100px)` }}
               ref={containerRef}
             >
@@ -133,21 +128,19 @@ export const Chat = () => {
                   minHeight: `calc(${baseCompHeight} - 100px - 2rem)`,
                 }}
               />
-              {messageLog
-                .filter((m) => !m.content?.startsWith("CONTEXT:"))
-                .map((message, index) => (
-                  <div
-                    key={index}
-                    className={`bg-${
-                      message.role === "user" ? "primary" : "secondary"
-                    } text-white px-3 py-2 rounded align-self-${
-                      message.role === "user" ? "end" : "start"
-                    }`}
-                    style={{ maxWidth: "75%" }}
-                  >
-                    {message.content}
-                  </div>
-                ))}
+              {messageLog.map((message, index) => (
+                <div
+                  key={index}
+                  className={`bg-${
+                    message.role === "user" ? "primary" : "secondary"
+                  } text-white px-3 py-2 rounded align-self-${
+                    message.role === "user" ? "end" : "start"
+                  }`}
+                  style={{ maxWidth: "75%" }}
+                >
+                  {message.content}
+                </div>
+              ))}
             </div>
           </>
         ) : (
@@ -161,7 +154,7 @@ export const Chat = () => {
         <button
           type="button"
           className="btn btn-secondary d-flex align-items-center fs-5"
-          onClick={handleClearMessages}
+          onClick={() => changeMessageLog("clear")}
           disabled={!initialLoaded || messageLog.length <= 1}
         >
           <GrPowerReset />

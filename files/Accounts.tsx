@@ -13,16 +13,16 @@ export const Accounts = () => {
   return (
     <div className="rounded w-100 shadow" style={{ height: baseCompHeight }}>
       <div
-        className="d-flex justify-content-center align-items-center rounded-top p-2"
+        className="d-flex justify-content-between align-items-center rounded-top p-3 border-bottom"
         style={{ height: "50px" }}
       >
+        <span className="fs-4 fw-bold w-100 text-nowrap">Accounts</span>
         <button
-          className="border-0 bg-transparent p-0 me-2"
+          className="border-0 bg-transparent p-0"
           onClick={() => changeChatOpen(true)}
         >
           <img src="/portal-pete.png" height={30} width={30} />
         </button>
-        <span className="fs-4 fw-bold w-100 ms-1 text-nowrap">Accounts</span>
       </div>
       <div
         className="rounded-bottom w-100 d-flex flex-column p-3"
@@ -35,6 +35,7 @@ export const Accounts = () => {
               <div className="d-flex mb-3 w-100 justify-content-between align-items-center">
                 <span>{accountType.type}</span>
                 <button
+                  className="btn btn-primary"
                   onClick={() =>
                     setAccounts((prev) => [
                       ...prev.filter((a) => a.id !== accountType.id),

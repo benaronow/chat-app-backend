@@ -14,7 +14,7 @@ export const ViewToggle = () => {
         <input
           type="radio"
           name="visibleComp"
-          value="chat"
+          value="accounts"
           checked={visibleComp === "accounts"}
           onChange={() => {
             changeVisibleComp("accounts");
@@ -29,7 +29,7 @@ export const ViewToggle = () => {
         <input
           type="radio"
           name="visibleComp"
-          value="context"
+          value="spending"
           checked={visibleComp === "spending"}
           onChange={() => {
             changeVisibleComp("spending");
