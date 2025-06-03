@@ -2,14 +2,16 @@ import React, { useState } from "react";
 import { useAppContext } from "../../providers/AppProvider";
 import { useAccounts } from "./useAccounts";
 import { TiArrowSortedDown, TiArrowSortedUp } from "react-icons/ti";
+import { useBreakpoint } from "../../useBreakpoint";
 
 export const Accounts = () => {
   const { changeChatOpen } = useAppContext();
   const initialAccounts = useAccounts;
   const [accounts, setAccounts] = useState(initialAccounts);
+  const { baseCompHeight } = useBreakpoint();
 
   return (
-    <div className="rounded w-100 h-100 shadow">
+    <div className="rounded w-100 shadow" style={{ height: baseCompHeight }}>
       <div
         className="d-flex justify-content-center align-items-center rounded-top p-2"
         style={{ height: "50px" }}
@@ -22,7 +24,10 @@ export const Accounts = () => {
         </button>
         <span className="fs-4 fw-bold w-100 ms-1 text-nowrap">Accounts</span>
       </div>
-      <div className="rounded-bottom h-100 w-100 d-flex flex-column p-3">
+      <div
+        className="rounded-bottom w-100 d-flex flex-column p-3"
+        style={{ height: `calc(${baseCompHeight} - 50px)` }}
+      >
         {accounts
           .sort((a, b) => a.id - b.id)
           .map((accountType) => (

@@ -1,12 +1,14 @@
 import { useAppContext } from "../../providers/AppProvider";
+import { useBreakpoint } from "../../useBreakpoint";
 import { useSpending } from "./useSpending";
 
 export const Spending = () => {
   const { changeChatOpen } = useAppContext();
   const initialSpending = useSpending();
+  const { baseCompHeight } = useBreakpoint();
 
   return (
-    <div className="rounded w-100 h-100 shadow">
+    <div className="rounded w-100 shadow" style={{ height: baseCompHeight }}>
       <div
         className="d-flex justify-content-center align-items-center rounded-top p-2"
         style={{ height: "50px" }}
@@ -19,7 +21,10 @@ export const Spending = () => {
         </button>
         <span className="fs-4 fw-bold w-100 ms-1 text-nowrap">Spending</span>
       </div>
-      <div className="rounded-bottom h-100 w-100 d-flex flex-column p-3">
+      <div
+        className="rounded-bottom w-100 d-flex flex-column p-3"
+        style={{ height: `calc(${baseCompHeight} - 50px)` }}
+      >
         <div className="d-flex justify-content-between gap-3 w-100">
           <div className="d-flex flex-column">
             <span className="fs-5">Income</span>

@@ -7,11 +7,37 @@ import {
   InvokeModelCommand,
 } from "@aws-sdk/client-bedrock-runtime";
 import { readFileContent, streamToString } from "./utils";
+import multer, { Multer } from "multer";
+import fs from "fs/promises";
 
 dotenv.config();
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/");
+  },
+  filename: (req, file, cb) => {
+    // Use original file name
+    cb(null, file.originalname);
+  },
+});
+
+const upload: Multer = multer({ storage });
+
+interface UploadedFile {
+  originalname: string;
+  path: string;
+  filename: string;
+  mimetype: string;
+}
+
+interface FileResult {
+  filename: string;
+  content: string;
+}
 
 app.get("/", async (req, res) => {
   res.send("Hello from the server!");
@@ -37,11 +63,9 @@ const MODEL_INSTRUCTIONS =
   "10. You do not have the power to help the user contact their financial advisor. If asked, it is okay to say you cannot help with that.";
 
 app.post("/api/chat", async (req, res) => {
-  const { model, messages, file } = req.body;
+  const { model, messages, filename } = req.body;
 
-  const fileContent = await readFileContent(
-    file === "accounts" ? "./files/Accounts.txt" : "./files/Spending.txt"
-  );
+  const fileContent = await readFileContent(`./files/${filename}`);
 
   const fileSpecificInstructions =
     MODEL_INSTRUCTIONS +
@@ -152,6 +176,35 @@ app.post("/api/chat", async (req, res) => {
       res.json({ reply: "Sorry, something went wrong." });
       res.status(500).json({ reply: "Sorry, something went wrong." });
     }
+  }
+});
+
+app.post("/upload", upload.array("files"), async (req, res) => {
+  try {
+    const files = req.files as Express.Multer.File[];
+
+    if (!files || files.length === 0) {
+      res.status(400).json({ error: "No files uploaded" });
+    }
+
+    const fileContents: FileResult[] = await Promise.all(
+      files.map(async (file: UploadedFile) => {
+        const content = await fs.readFile(file.path, "utf-8");
+        return {
+          filename: file.originalname,
+          content,
+        };
+      })
+    );
+
+    res.status(200).json({
+      success: true,
+      received: fileContents.length,
+      files: fileContents.map((f) => f.filename),
+    });
+  } catch (error) {
+    console.error("Error uploading files:", error);
+    res.status(500).json({ error: "Failed to process files" });
   }
 });
 
